@@ -40,7 +40,6 @@ body{
     font-size:22px;
     font-weight:600;
     margin-bottom:20px;
-    letter-spacing:0.3px;
 }
 
 /* LISTA */
@@ -59,12 +58,6 @@ body{
     display:flex;
     justify-content:space-between;
     align-items:center;
-    transition:.15s;
-}
-
-.card:hover{
-    transform:translateY(-1px);
-    border-color:rgba(79,124,255,0.3);
 }
 
 .title{
@@ -76,6 +69,27 @@ body{
     font-size:13px;
     color:var(--muted);
     margin-top:4px;
+}
+
+/* DELETE MENOR (AJUSTE PRINCIPAL) */
+.delete{
+    width:28px;
+    height:28px;
+    border-radius:8px;
+    border:1px solid rgba(255,77,77,0.25);
+    background:transparent;
+    color:var(--danger);
+    font-size:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:.15s;
+}
+
+.delete:hover{
+    background:rgba(255,77,77,0.08);
+    border-color:rgba(255,77,77,0.5);
 }
 
 /* BOTÃO FIXO */
@@ -94,10 +108,6 @@ body{
     width:220px;
 }
 
-.fab:hover{
-    filter:brightness(1.1);
-}
-
 /* MODAL */
 .overlay{
     position:fixed;
@@ -114,13 +124,6 @@ body{
     background:var(--card);
     border-radius:16px;
     padding:18px;
-    border:1px solid rgba(255,255,255,0.06);
-}
-
-.modal h2{
-    font-size:16px;
-    margin-bottom:14px;
-    font-weight:600;
 }
 
 input,select{
@@ -130,18 +133,12 @@ input,select{
     border:1px solid rgba(255,255,255,0.08);
     background:#0e1524;
     color:var(--text);
-    outline:none;
     margin-bottom:10px;
-}
-
-input:focus,select:focus{
-    border-color:var(--accent);
 }
 
 .actions{
     display:flex;
     gap:10px;
-    margin-top:10px;
 }
 
 button{
@@ -162,14 +159,6 @@ button{
     background:#1a2235;
     color:var(--text);
 }
-
-.delete{
-    background:transparent;
-    color:var(--danger);
-    border:1px solid rgba(255,77,77,0.3);
-    padding:8px 10px;
-    border-radius:10px;
-}
 </style>
 </head>
 
@@ -184,8 +173,6 @@ button{
 
 <div class="overlay" id="overlay">
     <div class="modal">
-        <h2>Novo console</h2>
-
         <input id="name" placeholder="Nome do console">
 
         <select id="type">
@@ -231,7 +218,7 @@ function render(){
                 <div class="title">${c.name}</div>
                 <div class="subtitle">${c.type}</div>
             </div>
-            <button class="delete" onclick="remove(${i})">Excluir</button>
+            <button class="delete" onclick="remove(${i})">×</button>
         </div>
         `;
     });
@@ -270,4 +257,4 @@ load();
 </script>
 
 </body>
-  </html>
+</html>
