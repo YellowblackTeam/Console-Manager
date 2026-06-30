@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Console Manager</title>
-<link rel="manifest" href="manifest.json">
 
 <style>
 :root{
@@ -14,13 +13,14 @@
     --text:#e6e9f2;
     --accent:#4f7cff;
     --danger:#ff4d4d;
+    --green:#22c55e;
 }
 
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
-    font-family:system-ui, Arial;
+    font-family:system-ui;
 }
 
 body{
@@ -38,9 +38,10 @@ body{
 }
 
 .header{
-    font-size:22px;
+    font-size:20px;
     font-weight:600;
     margin-bottom:20px;
+    cursor:pointer;
 }
 
 /* LISTA */
@@ -55,7 +56,7 @@ body{
     background:var(--card);
     border:1px solid rgba(255,255,255,0.05);
     border-radius:14px;
-    padding:16px;
+    padding:14px;
     display:flex;
     justify-content:space-between;
     align-items:center;
@@ -72,37 +73,32 @@ body{
     margin-top:4px;
 }
 
-/* DELETE MENOR (AJUSTE PRINCIPAL) */
-.delete{
-    width:26px;
-    height:26px;
-    flex:0 0 auto;
-    align-self:center;
-
+/* BOTÕES PEQUENOS */
+.btn{
+    width:28px;
+    height:28px;
     border-radius:8px;
-    border:1px solid rgba(255,77,77,0.25);
+    border:1px solid rgba(255,255,255,0.08);
     background:transparent;
-    color:var(--danger);
-
-    font-size:14px;
-    line-height:1;
-
+    color:var(--text);
     display:flex;
     align-items:center;
     justify-content:center;
-
     cursor:pointer;
-    transition:.15s;
-}
-    
+    font-size:14px;
 }
 
-.delete:hover{
-    background:rgba(255,77,77,0.08);
-    border-color:rgba(255,77,77,0.5);
+.delete{
+    border-color:rgba(255,77,77,0.3);
+    color:var(--danger);
 }
 
-/* BOTÃO FIXO */
+.games{
+    border-color:rgba(79,124,255,0.3);
+    color:var(--accent);
+}
+
+/* BOTÃO ADD */
 .fab{
     position:fixed;
     bottom:18px;
@@ -113,9 +109,8 @@ body{
     color:white;
     padding:14px 20px;
     border-radius:12px;
-    font-size:14px;
-    cursor:pointer;
     width:220px;
+    cursor:pointer;
 }
 
 /* MODAL */
@@ -151,23 +146,22 @@ input,select{
     gap:10px;
 }
 
-button{
-    flex:1;
-    padding:12px;
-    border-radius:10px;
-    border:none;
-    cursor:pointer;
-    font-size:14px;
-}
-
 .save{
     background:var(--accent);
     color:white;
+    border:none;
+    padding:12px;
+    flex:1;
+    border-radius:10px;
 }
 
 .cancel{
     background:#1a2235;
     color:var(--text);
+    border:none;
+    padding:12px;
+    flex:1;
+    border-radius:10px;
 }
 </style>
 </head>
@@ -175,92 +169,163 @@ button{
 <body>
 
 <div class="container">
-    <div class="header">Console Manager</div>
-    <div class="list" id="list"></div>
+
+<div class="header" id="header">Consoles</div>
+
+<div class="list" id="list"></div>
+
 </div>
 
-<button class="fab" onclick="openModal()">Adicionar console</button>
+<button class="fab" onclick="openAdd()">Adicionar</button>
 
+<!-- MODAL -->
 <div class="overlay" id="overlay">
-    <div class="modal">
-        <input id="name" placeholder="Nome do console">
+<div class="modal">
+<input id="name" placeholder="Nome">
 
-        <select id="type">
-            <option>PlayStation 5</option>
-            <option>PlayStation 4</option>
-            <option>Xbox Series X</option>
-            <option>Xbox Series S</option>
-            <option>Nintendo Switch</option>
-            <option>Nintendo Switch 2</option>
-            <option>Steam Deck</option>
-            <option>Outros</option>
-        </select>
+<select id="type">
+<option>PlayStation 5</option>
+<option>PlayStation 4</option>
+<option>Xbox Series X</option>
+<option>Xbox Series S</option>
+<option>Nintendo Switch</option>
+<option>Steam Deck</option>
+<option>Outros</option>
+</select>
 
-        <div class="actions">
-            <button class="cancel" onclick="closeModal()">Cancelar</button>
-            <button class="save" onclick="add()">Salvar</button>
-        </div>
-    </div>
+<div class="actions">
+<button class="cancel" onclick="closeModal()">Cancelar</button>
+<button class="save" onclick="saveItem()">Salvar</button>
+</div>
+
+</div>
 </div>
 
 <script>
 
-let data = [];
+let mode = "consoles";
+let consoles = [];
+let selected = null;
 
 function save(){
-    localStorage.setItem("consoles", JSON.stringify(data));
+    localStorage.setItem("data", JSON.stringify(consoles));
 }
 
 function load(){
-    const saved = localStorage.getItem("consoles");
-    if(saved) data = JSON.parse(saved);
+    const d = localStorage.getItem("data");
+    if(d) consoles = JSON.parse(d);
     render();
 }
 
+/* RENDER */
 function render(){
     const list = document.getElementById("list");
+    const header = document.getElementById("header");
+
     list.innerHTML = "";
 
-    data.forEach((c,i)=>{
-        list.innerHTML += `
-        <div class="card">
-            <div>
-                <div class="title">${c.name}</div>
-                <div class="subtitle">${c.type}</div>
+    if(mode === "consoles"){
+        header.innerText = "Consoles";
+
+        consoles.forEach((c,i)=>{
+            list.innerHTML += `
+            <div class="card">
+                <div>
+                    <div class="title">${c.name}</div>
+                    <div class="subtitle">${c.type}</div>
+                </div>
+
+                <div style="display:flex; gap:6px;">
+                    <button class="btn games" onclick="openGames(${i})">J</button>
+                    <button class="btn delete" onclick="removeConsole(${i})">×</button>
+                </div>
             </div>
-            <button class="delete" onclick="remove(${i})">×</button>
-        </div>
-        `;
-    });
+            `;
+        });
+    }
+
+    if(mode === "games"){
+        header.innerText = "Jogos - " + consoles[selected].name;
+
+        consoles[selected].games.forEach((g,i)=>{
+            list.innerHTML += `
+            <div class="card">
+                <div>
+                    <div class="title">${g}</div>
+                </div>
+
+                <button class="btn delete" onclick="removeGame(${i})">×</button>
+            </div>
+            `;
+        });
+    }
 }
 
-function add(){
-    const name = document.getElementById("name").value.trim();
-    const type = document.getElementById("type").value;
-
-    if(!name) return;
-
-    data.push({name,type});
+/* CONSOLES */
+function removeConsole(i){
+    consoles.splice(i,1);
     save();
     render();
-    closeModal();
-
-    document.getElementById("name").value = "";
 }
 
-function remove(i){
-    data.splice(i,1);
+/* GAMES */
+function openGames(i){
+    selected = i;
+
+    if(!consoles[i].games){
+        consoles[i].games = [];
+    }
+
+    mode = "games";
+    render();
+}
+
+function removeGame(i){
+    consoles[selected].games.splice(i,1);
     save();
     render();
 }
 
-function openModal(){
+/* MODAL */
+let addType = "console";
+
+function openAdd(){
     document.getElementById("overlay").style.display="flex";
 }
 
 function closeModal(){
     document.getElementById("overlay").style.display="none";
 }
+
+function saveItem(){
+    const name = document.getElementById("name").value;
+
+    if(!name) return;
+
+    if(mode === "consoles"){
+        consoles.push({
+            name,
+            type: document.getElementById("type").value,
+            games:[]
+        });
+    } else {
+        consoles[selected].games.push(name);
+    }
+
+    save();
+    render();
+    closeModal();
+
+    document.getElementById("name").value="";
+}
+
+/* CLICK HEADER VOLTAR */
+document.getElementById("header").onclick = ()=>{
+    if(mode === "games"){
+        mode = "consoles";
+        render();
+    }
+};
 
 load();
 
